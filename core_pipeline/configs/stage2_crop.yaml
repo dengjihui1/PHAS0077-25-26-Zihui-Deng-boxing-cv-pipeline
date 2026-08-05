@@ -1,0 +1,11 @@
+# Stage 2 — crop to the fighters: union -> EMA-smoothed, padded, fixed square.
+crop_size: 224
+pad_frac: 0.15
+ema_alpha: 0.2          # lower = smoother but laggier on fast lunges (Stage-3 ablation knob)
+scale_mode: union       # "union" (both fighters in frame) | "max_single_fighter" (consistent zoom)
+min_half_side: 0.0      # floor on half-side px so a lone fighter doesn't over-zoom
+single_fighter_scale: 1.8  # only 1 fighter found -> enlarge the union crop to cover the missing opponent (1.0=off)
+max_staleness: 30       # frames of carry-forward before full-frame fallback
+fallback: full_frame
+resize_mode: area
+emit_per_fighter: false  # TEMP: per-fighter boxes will move into crop_windows.parquet (refactor)

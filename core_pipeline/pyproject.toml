@@ -1,0 +1,104 @@
+[project]
+name = "boxing-cv-pipeline"
+version = "0.1.0"
+description = "Five-stage boxing punch detection & strike-type classification pipeline"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+# Core runtime deps — needed by `bcv.common` and the lightweight stages (2, 4).
+# Heavy, stage-specific deps live in the extras below and are installed per-milestone
+# so the foundation never pulls a CUDA torch it does not use.
+dependencies = [
+    "pydantic>=2.7",
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "pyarrow>=16",
+    "pyyaml>=6",
+    "opencv-python-headless>=4.9",
+    "imageio-ffmpeg>=0.5",  # bundles an ffmpeg binary — no system ffmpeg needed (POV splitter)
+]
+
+[project.optional-dependencies]
+# Stage 1 detector backends (added in M1). ultralytics pulls torch transitively.
+detect = [
+    "ultralytics>=8.3",
+    "lap>=0.5.12",  # botsort tracker dependency (ultralytics auto-installs it otherwise)
+]
+# Stages 3 & 5 training (added in M3/M5). torch is pinned to the cu124 wheel via
+# [tool.uv.sources] below; resolved only when this extra is synced.
+train = [
+    "torch>=2.5.1",
+    "torchvision>=0.20.1",
+    "lightning>=2.4",
+    "transformers>=4.44",
+    "decord>=0.6",
+    "matplotlib>=3.8",
+    "comet-ml>=3.39",
+]
+# Labelling GUI (browser-based, served over an SSH tunnel). Pre-fill reuses the `detect`
+# (chain detector) and `train` (punch finder) extras when present, but the server runs
+# without them (pre-fill just disabled).
+label = [
+    "fastapi>=0.110",
+    "uvicorn>=0.30",
+]
+
+[project.scripts]
+bcv-label = "bcv.label.__main__:main"
+bcv-label-prefill = "bcv.label.prefill_cli:main"
+bcv-detect = "bcv.stage1_detect.__main__:main"
+bcv-crop = "bcv.stage2_crop.__main__:main"
+bcv-frame-clf = "bcv.stage3_frame_classifier.__main__:main"
+bcv-window = "bcv.stage4_windowing.__main__:main"
+bcv-strike-clf = "bcv.stage5_strike_classifier.__main__:main"
+bcv-eval = "bcv.eval.__main__:main"
+bcv-split = "bcv.preprocess.pov_split:main"
+bcv-detector-finetune = "bcv.stage1_detect.finetune:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-cov>=5",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "types-pyyaml",
+    "pandas-stubs",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bcv"]
+
+# When the `train` extra is synced, pull torch/torchvision from the CUDA 12.4 index.
+[tool.uv.sources]
+torch = { index = "pytorch-cu124" }
+torchvision = { index = "pytorch-cu124" }
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["E501"]  # line length enforced by formatter, not linter
+
+[tool.mypy]
+python_version = "3.11"
+packages = ["bcv"]
+ignore_missing_imports = true
+warn_redundant_casts = true
+warn_unused_ignores = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

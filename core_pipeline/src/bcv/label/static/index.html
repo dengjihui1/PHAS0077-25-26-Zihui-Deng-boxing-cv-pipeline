@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>bcv-label — bbox placer</title>
+<style>
+  :root { --red:#ff4d4d; --blue:#4d8bff; --bg:#15171c; --panel:#1e2229; --fg:#d7dbe0; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.4 system-ui,sans-serif; }
+  #wrap { display:flex; gap:14px; padding:14px; height:100vh; }
+  #main { flex:1; display:flex; flex-direction:column; gap:8px; min-width:0; }
+  canvas { background:#000; max-width:100%; border:1px solid #333; cursor:crosshair; }
+  #scrub { width:100%; }
+  #bar { display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+  #panel { width:260px; background:var(--panel); border-radius:8px; padding:12px; overflow:auto; }
+  .chip { display:inline-block; padding:2px 8px; border-radius:4px; font-weight:600; }
+  .red { background:var(--red); color:#000; } .blue { background:var(--blue); color:#000; }
+  kbd { background:#333; border-radius:3px; padding:1px 6px; font-family:monospace; }
+  table { width:100%; border-collapse:collapse; } td { padding:3px 4px; vertical-align:top; }
+  #status { color:#8af58a; min-height:18px; }
+  .dim { color:#8b909a; }
+  button { background:#2b303a; color:var(--fg); border:1px solid #3a414d; border-radius:5px;
+           padding:5px 10px; cursor:pointer; } button:hover { background:#343b47; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="main">
+    <div id="bar">
+      <span>frame <b id="fno">0</b> / <span id="fmax">0</span></span>
+      <span class="dim" id="tsec">0.0s</span>
+      <span id="inround" class="dim"></span>
+      <span>active: <span id="active" class="chip red">RED</span></span>
+      <button id="playbtn" onclick="togglePlay()">▶ Play</button>
+      <button id="candbtn" onclick="toggleCandidates()">Raw YOLO: off (y)</button>
+      <button onclick="prefill('here')">Pre-fill ±30s here</button>
+      <button onclick="prefill('all')">Pre-fill whole</button>
+      <button id="cancelbtn" style="display:none" onclick="cancelPrefill()">✕ Cancel</button>
+      <button onclick="save()">Save</button>
+      <span id="status"></span>
+    </div>
+    <canvas id="cv"></canvas>
+    <input id="scrub" type="range" min="0" max="0" value="0"/>
+  </div>
+  <div id="panel">
+    <h3>bbox placer</h3>
+    <div id="meta" class="dim"></div>
+    <h4>keys</h4>
+    <table>
+      <tr><td><kbd>Space</kbd></td><td>play / pause</td></tr>
+      <tr><td><kbd>R</kbd>/<kbd>B</kbd></td><td>select red / blue</td></tr>
+      <tr><td>drag</td><td>place box for active fighter (sets a keyframe here)</td></tr>
+      <tr><td><kbd>X</kbd></td><td>mark active fighter ABSENT here</td></tr>
+      <tr><td><kbd>Del</kbd></td><td>remove the keyframe here (re-interpolate)</td></tr>
+      <tr><td><kbd>←</kbd>/<kbd>→</kbd></td><td>±1 frame</td></tr>
+      <tr><td><kbd>↑</kbd>/<kbd>↓</kbd></td><td>±1 second</td></tr>
+      <tr><td><kbd>[</kbd>/<kbd>]</kbd></td><td>prev / next keyframe (active)</td></tr>
+      <tr><td><kbd>Y</kbd></td><td>toggle raw YOLO boxes (grey)</td></tr>
+      <tr><td>click grey</td><td>assign that raw box to the active fighter</td></tr>
+      <tr><td><kbd>G</kbd>/<kbd>H</kbd></td><td>mark round start / end (here)</td></tr>
+      <tr><td><kbd>S</kbd></td><td>save + export GT</td></tr>
+    </table>
+    <h4>this frame</h4>
+    <div id="info"></div>
+    <h4>rounds (fight-level)</h4>
+    <div id="rounds" class="dim"></div>
+    <div style="margin-top:6px">
+      <button onclick="markRound('start')">start (g)</button>
+      <button onclick="markRound('end')">end (h)</button>
+      <button onclick="clearRounds()">clear</button>
+    </div>
+    <p class="dim">Rounds are saved per-fight (all 4 splits). Training uses only in-round frames.</p>
+    <p class="dim">Solid box = keyframe here. Faint = interpolated. Save writes the
+       canonical <code>fighter_bboxes.json</code>.</p>
+  </div>
+</div>
+<script>
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+const img = new Image();
+let meta = null, cur = 0, active = 'red', boxes = {}, drag = null;
+let rounds = [], pendingStart = null;
+let showCandidates = false, candidates = [];
+let emaCrop = null, lastCropFrame = -99;   // smoothed crop-box preview (eases on size change)
+const CROP_EMA = 0.25;                      // per sequential-frame easing toward the target crop
+
+async function loadRounds(){ const r = await jget('/api/rounds'); rounds = r.rounds; pendingStart = r.pending_start; renderRounds(); }
+function renderRounds(){
+  const el = document.getElementById('rounds');
+  const fps = meta ? meta.fps : 30;
+  let h = rounds.map(([s,e],i) => `R${i+1}: ${s}–${e} <span class="dim">(${(s/fps).toFixed(0)}–${(e/fps).toFixed(0)}s)</span> <a href="#" onclick="delRound(${i});return false">✕</a>`).join('<br>');
+  if(pendingStart != null) h += `<br><span style="color:#f5a86a">…open: start @ ${pendingStart} — press h at the end</span>`;
+  el.innerHTML = h || 'none — mark with g (start) / h (end)';
+}
+async function markRound(edge){
+  const r = await jpost('/api/rounds/mark', {edge, frame: cur});
+  if(r.detail){ setStatus('rounds: ' + r.detail); return; }
+  rounds = r.rounds; pendingStart = r.pending_start; renderRounds(); updateInRound();
+  setStatus(edge === 'start' ? `round start @ ${cur} — press h at the end` : 'round saved');
+}
+async function delRound(i){ const r = await jpost('/api/rounds/delete', {index: i}); rounds = r.rounds; renderRounds(); updateInRound(); }
+async function clearRounds(){ if(!confirm('Clear all rounds for this fight?')) return; const r = await jpost('/api/rounds/clear'); rounds = r.rounds; pendingStart = null; renderRounds(); updateInRound(); }
+
+async function jget(u){ const r = await fetch(u); return r.json(); }
+async function jpost(u, body){ const r = await fetch(u, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body||{})}); return r.json(); }
+function setStatus(t){ document.getElementById('status').textContent = t; }
+
+async function load(){
+  meta = await jget('/api/meta');
+  cv.width = meta.width; cv.height = meta.height;
+  document.getElementById('fmax').textContent = meta.num_frames - 1;
+  document.getElementById('scrub').max = meta.num_frames - 1;
+  document.getElementById('meta').textContent =
+    `bout ${meta.bout} split ${meta.split} · ${meta.width}×${meta.height} · ${meta.fps.toFixed(1)}fps`;
+  setActive('red');
+  await loadRounds();
+  go(0);
+}
+function bigStep(){ return Math.max(1, Math.round(meta.fps)); }
+
+async function go(idx){
+  cur = Math.max(0, Math.min(idx, meta.num_frames - 1));
+  document.getElementById('fno').textContent = cur;
+  document.getElementById('tsec').textContent = (cur/meta.fps).toFixed(2) + 's';
+  document.getElementById('scrub').value = cur;
+  boxes = await jget('/api/boxes/' + cur);
+  await new Promise(res => { img.onload = res; img.src = '/frame/' + cur + '?t=' + Date.now(); });
+  if(showCandidates && !playing){ candidates = (await jget('/api/candidates/' + cur)).boxes || []; }
+  else candidates = [];
+  // Ease the crop-box preview toward this frame's target (smooth on sequential nav, snap on jumps),
+  // mirroring Stage 2's EMA so the box doesn't pop when single_fighter_scale kicks in.
+  if(boxes.crop_box){
+    const cb = boxes.crop_box;
+    const tgt = {cx:(cb[0]+cb[2])/2, cy:(cb[1]+cb[3])/2, half:(cb[2]-cb[0])/2};
+    if(emaCrop && Math.abs(cur - lastCropFrame) <= 1){
+      emaCrop = {cx: emaCrop.cx + CROP_EMA*(tgt.cx-emaCrop.cx),
+                 cy: emaCrop.cy + CROP_EMA*(tgt.cy-emaCrop.cy),
+                 half: emaCrop.half + CROP_EMA*(tgt.half-emaCrop.half)};
+    } else emaCrop = tgt;   // first frame or a non-sequential jump -> snap
+  }
+  lastCropFrame = cur;
+  redraw(); renderInfo(); updateInRound();
+}
+function updateInRound(){
+  const el = document.getElementById('inround'); const ir = rounds.some(([s,e]) => cur>=s && cur<=e);
+  el.textContent = rounds.length ? (ir ? '● in round' : '○ between rounds') : '';
+  el.style.color = rounds.length ? (ir ? '#8af58a' : '#f5a86a') : '';
+}
+function drawBox(b, color, key){
+  if(!b) return;
+  ctx.strokeStyle = color; ctx.lineWidth = key ? 3 : 1.5;
+  ctx.setLineDash(key ? [] : [6,4]);
+  ctx.strokeRect(b[0], b[1], b[2]-b[0], b[3]-b[1]);
+  ctx.setLineDash([]);
+}
+function redraw(){
+  ctx.drawImage(img, 0, 0, cv.width, cv.height);
+  // the crop box (green, size-eased) = the region Stage 2 would crop for the model
+  if(emaCrop){
+    const h = emaCrop.half, x = emaCrop.cx - h, y = emaCrop.cy - h;
+    ctx.strokeStyle = '#00dd00'; ctx.lineWidth = 2; ctx.setLineDash([]);
+    ctx.strokeRect(x, y, 2*h, 2*h);
+    ctx.fillStyle = '#00dd00'; ctx.font = '11px monospace'; ctx.fillText('CROP', x+3, y+2*h-4);
+  }
+  // raw YOLO candidates underneath (grey) so they don't hide the red/blue boxes
+  for(const c of candidates){
+    ctx.strokeStyle = '#bbbbbb'; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+    ctx.strokeRect(c[0], c[1], c[2]-c[0], c[3]-c[1]); ctx.setLineDash([]);
+    ctx.fillStyle = '#bbbbbb'; ctx.font = '11px monospace';
+    if(c[4]!==undefined) ctx.fillText(c[4].toFixed(2), c[0]+2, c[1]+11);
+  }
+  if(boxes.red) drawBox(boxes.red.box, '#ff4d4d', boxes.red.is_key);
+  if(boxes.blue) drawBox(boxes.blue.box, '#4d8bff', boxes.blue.is_key);
+  if(drag) drawBox([drag.x0,drag.y0,drag.x1,drag.y1], active==='red'?'#ff4d4d':'#4d8bff', true);
+}
+async function toggleCandidates(){
+  showCandidates = !showCandidates;
+  document.getElementById('candbtn').textContent = 'Raw YOLO: ' + (showCandidates?'on':'off') + ' (y)';
+  if(showCandidates && !meta.can_candidates){ setStatus('raw YOLO unavailable (need --extra detect)'); }
+  go(cur);
+}
+function renderInfo(){
+  const f = c => boxes[c] && boxes[c].box ? (boxes[c].is_key?'<b>key</b>':'interp')+` [${boxes[c].box.map(Math.round).join(', ')}]` : '<span class="dim">absent</span>';
+  const nf = boxes.n_fighters;
+  const crop = nf >= 2 ? '<span style="color:#00dd00">crop = union of both</span>'
+    : `<span style="color:#f5a86a">crop expanded (${nf} fighter${nf===1?'':'s'} found)</span>`;
+  document.getElementById('info').innerHTML =
+    `<div><span class="chip red">RED</span> ${f('red')}</div>`+
+    `<div style="margin-top:4px"><span class="chip blue">BLUE</span> ${f('blue')}</div>`+
+    `<div style="margin-top:4px">${crop}</div>`;
+}
+function setActive(c){ active = c; const el = document.getElementById('active');
+  el.textContent = c.toUpperCase(); el.className = 'chip ' + c; }
+
+function pos(e){ const r = cv.getBoundingClientRect();
+  return { x: (e.clientX-r.left)*(cv.width/r.width), y: (e.clientY-r.top)*(cv.height/r.height) }; }
+cv.addEventListener('mousedown', e => { playing = false; const p = pos(e); drag = {x0:p.x,y0:p.y,x1:p.x,y1:p.y}; });
+cv.addEventListener('mousemove', e => { if(!drag) return; const p = pos(e); drag.x1=p.x; drag.y1=p.y; redraw(); });
+cv.addEventListener('mouseup', async e => {
+  if(!drag) return;
+  const b = [Math.round(Math.min(drag.x0,drag.x1)), Math.round(Math.min(drag.y0,drag.y1)),
+             Math.round(Math.max(drag.x0,drag.x1)), Math.round(Math.max(drag.y0,drag.y1))];
+  const pt = {x: drag.x0, y: drag.y0};
+  drag = null;
+  if(b[2]-b[0] < 4 || b[3]-b[1] < 4){            // a click, not a drag
+    // click a raw YOLO box -> assign it (smallest box containing the point)
+    const inside = candidates.filter(c => pt.x>=c[0] && pt.x<=c[2] && pt.y>=c[1] && pt.y<=c[3])
+      .sort((a,c) => (a[2]-a[0])*(a[3]-a[1]) - (c[2]-c[0])*(c[3]-c[1]));
+    if(inside.length){
+      const c = inside[0];
+      boxes = await jpost('/api/box', {fighter:active, frame:cur, box:[c[0],c[1],c[2],c[3]]});
+      renderInfo(); setStatus(`assigned raw YOLO box to ${active} @ ${cur}`);
+    }
+    redraw(); return;
+  }
+  boxes = await jpost('/api/box', {fighter:active, frame:cur, box:b});
+  redraw(); renderInfo(); setStatus(`set ${active} keyframe @ ${cur}`);
+});
+
+async function markAbsent(){ boxes = await jpost('/api/box', {fighter:active, frame:cur, box:null});
+  redraw(); renderInfo(); setStatus(`marked ${active} ABSENT @ ${cur}`); }
+async function delKey(){ boxes = await jpost('/api/box/delete', {fighter:active, frame:cur});
+  redraw(); renderInfo(); setStatus(`removed ${active} keyframe @ ${cur}`); }
+async function jumpKey(dir){ const kf = await jget('/api/keyframes'); const ks = kf[active]||[];
+  const nxt = dir>0 ? ks.find(k=>k>cur) : [...ks].reverse().find(k=>k<cur);
+  if(nxt!==undefined) go(nxt); }
+async function save(){ const r = await jpost('/api/save'); setStatus('saved → ' + r.exported); }
+
+// ---- playback ----
+let playing = false;
+function setPlayBtn(){ document.getElementById('playbtn').textContent = playing ? '⏸ Pause' : '▶ Play'; }
+async function play(){
+  if(playing) return; playing = true; setPlayBtn();
+  const dt = 1000/meta.fps;
+  while(playing && cur < meta.num_frames - 1){
+    const t0 = performance.now(); await go(cur+1);
+    const w = dt - (performance.now()-t0); if(w > 0) await new Promise(r=>setTimeout(r,w));
+  }
+  playing = false; setPlayBtn();
+}
+function togglePlay(){ if(playing){ playing = false; setPlayBtn(); } else { play(); } }
+
+// ---- pre-fill (background, scoped, cancellable) ----
+async function prefill(scope){
+  if(!meta.can_prefill){ setStatus('pre-fill unavailable (need --extra detect)'); return; }
+  let start = 0, count = null, label = 'the WHOLE split (~20 min)';
+  if(scope === 'here'){ const w = Math.round(30*meta.fps); start = Math.max(0, cur-w); count = 2*w; label = '±30s around this frame'; }
+  if(!confirm(`Run the chain detector over ${label}?\nIt runs in the background — keep scrubbing/labelling and Cancel anytime.`)) return;
+  const q = `?stride=15&start_frame=${start}` + (count!=null ? `&count=${count}` : '');
+  const r = await jpost('/api/prefill' + q);
+  if(r.detail){ setStatus('pre-fill: ' + r.detail); return; }
+  document.getElementById('cancelbtn').style.display = '';
+  pollPrefill();
+}
+async function pollPrefill(){
+  const st = await jget('/api/prefill/status');
+  const hideCancel = () => document.getElementById('cancelbtn').style.display = 'none';
+  if(st.error){ setStatus('pre-fill error: ' + st.error); hideCancel(); return; }
+  if(st.running){
+    const pct = st.total ? Math.round(100*st.done/st.total) : 0;
+    setStatus(`pre-filling… ${pct}% (${st.done}/${st.total} frames)`);
+    setTimeout(pollPrefill, 2000);
+  } else {
+    setStatus(`pre-fill done (+${st.added} keyframes)`); hideCancel(); go(cur);
+  }
+}
+async function cancelPrefill(){ await jpost('/api/prefill/cancel'); setStatus('cancelling pre-fill…'); }
+
+document.getElementById('scrub').addEventListener('input', e => go(+e.target.value));
+document.addEventListener('keydown', e => {
+  if(e.target.tagName === 'INPUT') return;
+  const k = e.key.toLowerCase();
+  if(k===' '){ togglePlay(); }
+  else if(k==='arrowleft'){ playing=false; go(cur-1); } else if(k==='arrowright'){ playing=false; go(cur+1); }
+  else if(k==='arrowup'){ playing=false; go(cur+bigStep()); } else if(k==='arrowdown'){ playing=false; go(cur-bigStep()); }
+  else if(k==='r'){ setActive('red'); redraw(); } else if(k==='b'){ setActive('blue'); redraw(); }
+  else if(k==='x'){ markAbsent(); } else if(k==='delete'||k==='backspace'){ delKey(); }
+  else if(k==='['){ playing=false; jumpKey(-1); } else if(k===']'){ playing=false; jumpKey(1); }
+  else if(k==='g'){ markRound('start'); } else if(k==='h'){ markRound('end'); }
+  else if(k==='y'){ toggleCandidates(); }
+  else if(k==='s'){ e.preventDefault(); save(); } else return;
+  e.preventDefault();
+});
+load();
+</script>
+</body>
+</html>

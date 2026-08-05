@@ -1,0 +1,14 @@
+# Stage 4 windowing: hysteresis on p_smooth -> strike windows.
+# Current held-out bout-115/split-1 operating point from scripts/sweep_stage4.py.
+# The main remaining error is under-segmentation: adjacent punches often become one
+# long predicted window. Peak splitting is off by default and should be enabled only
+# if the next sweep shows a better recall/precision/merge tradeoff.
+t_high: 0.75         # rise above to open a window
+t_low: 0.75          # fall below to close
+min_duration: 1      # drop windows shorter than this (frames)
+merge_gap: 2         # join windows separated by <= this many frames
+split_valley: null   # optional: split long windows at dips <= this probability
+split_min_gap: 2     # dip must last at least this many frames to split a window
+split_peak_min_prob: null  # optional: split long windows around multiple local peaks
+split_peak_min_distance: 8 # peaks must be at least this many frames apart
+split_peak_min_drop: 0.1   # valley between peaks must drop this far below weaker peak

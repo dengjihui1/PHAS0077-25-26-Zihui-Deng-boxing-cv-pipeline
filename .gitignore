@@ -1,0 +1,37 @@
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Local/editor state
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Large data, videos, checkpoints and generated caches
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.pt
+*.pth
+*.ckpt
+*.npz
+*.npy
+*.memmap
+*.pkl
+*.pickle
+
+# Runtime logs and temporary outputs
+logs/
+nohup.out
+*.log
+output/
+outputs/
+wandb/
+lightning_logs/

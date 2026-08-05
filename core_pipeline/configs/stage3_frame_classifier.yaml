@@ -1,0 +1,21 @@
+# Stage 3 — per-frame punch classifier (configurable centered window).
+k: 2                      # half-width: window = 2k+1 frames (k=0 => single-frame baseline)
+k_pad: 1                  # dilate annotation runs by +/-k_pad for the binary target
+backbone: small3d         # small3d | channel_stack_2d
+lr: 1.0e-4
+weight_decay: 1.0e-4
+pos_weight: auto          # "auto" => neg/pos from train positive fraction, or a float
+focal_gamma: 0.0
+dropout: 0.3
+batch_size: 16
+num_workers: 2
+max_epochs: 10
+roll_w: 11                # rolling-average window for p_smooth
+exclude_carried_forward: false
+exclude_between_rounds: true   # train/eval only on in-round frames (per-fight rounds.json)
+# Calibration off by default: raw sigmoid IS the probability. Temperature scaling is
+# only meaningful fit on a held-out val set once a real model exists (revisit for Stage 4).
+calibration: none
+accelerator: auto
+devices: auto
+precision: 32-true

@@ -1,0 +1,19 @@
+# Stage 1 — fighter detection. Backend A (chain) ships first; all weights on disk.
+backend: chain   # "chain" (detect->classify) | "finetuned" (Backend B, weights pending)
+
+detector_weights: ${BCV_MODELS_ROOT}/yolo26x.pt           # ${BCV_MODELS_ROOT} defaults to ../moughton/models
+classifier_weights: ${BCV_MODELS_ROOT}/boxer_yolo26_classifier/weights/best.pt
+finetuned_weights: null   # set when Backend B weights are recovered/trained
+
+det_imgsz: 512
+cls_imgsz: 224
+max_det: 5
+iou: 0.95
+crop_pad: 0.05
+crop_min_x: 25
+crop_min_y: 50
+min_cls_conf: 0.4      # red/blue gate (0.5->0.4 to recover missed fighters; red FPs were only ~859 at 0.5)
+box_hold_frames: 15    # hold that label across short classifier dips (recall)
+tracker: botsort.yaml
+device: 0
+half: true

@@ -1,0 +1,24 @@
+# Single source of truth for data roots + bout-level splits. Stage configs extend this.
+# Portable roots: ${BCV_DATA_ROOT} defaults to ../data beside the repo, ${BCV_REPO_ROOT}
+# to the repo; both overridable via env or .env (see src/bcv/common/config.py + README).
+data_root: ${BCV_DATA_ROOT}/preprocessed/new_splits
+output_root: ${BCV_REPO_ROOT}/output
+
+# bout number -> directory name under data_root
+bouts:
+  115: "Bout 115_Split 1-4"
+  116: "Bout 116_Split 1-4"
+  117: "Bout 117_Split 1-4"
+  120: "Bout 120_Split 1-4"
+  121: "Bout 121_Split 1-4"
+  122: "Bout 122_Split 1-4"
+
+# Bout-level splits (must be DISJOINT — the leakage guard enforces it). Used by the
+# TRAINING stages (3, 5). Stage 1/2/4 ignore this (they process whatever bout you point
+# them at). The cross-bout experiment overrides these via --train-bouts / --eval-bout.
+splits:
+  train: [116, 117]
+  val: []          # no separate val fight yet (only 3 fights have boxes)
+  test: [115]
+
+num_views: 4
