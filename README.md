@@ -124,10 +124,3 @@ bash Zihui/stage5_fighter_query_final/run_matched.sh
 ```
 
 The copied folder is for clean submission/reading. On the server, paths may need to be placed under `/home/ubuntu/boxing-cv-pipeline/Zihui/` as in the original experiment folders.
-
-## Verification Status
-
-- Local final code folders exist and were copied into this folder.
-- The copied `core_pipeline` source/config/dependency files were hash-checked against the local original repository.
-- Python syntax compilation was run on all selected Python files.
-- No visual or runtime training test was run as part of this cleanup because the full dataset and GPU environment are on the AWS server.
