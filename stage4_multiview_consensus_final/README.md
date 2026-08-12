@@ -16,7 +16,7 @@ major source of noisy multi-label Stage 5 clips.
 2. Compare raw and within-view rank normalization.
 3. Compare max, top-2 mean, mean, and median view fusion.
 4. Detect short local-maximum proposals with temporal NMS.
-5. Select parameters on Bout 122 only; evaluate Bout 115 once.
+5. Select robust parameters on development data without using Bout 115; evaluate Bout 115 once.
 
 The script writes `sweep.csv`, `selected_result.json`, and one consensus `windows.json`
 file per bout below `results/`. Existing outputs are read-only.

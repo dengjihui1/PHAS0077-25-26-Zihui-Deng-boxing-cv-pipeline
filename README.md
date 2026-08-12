@@ -56,7 +56,7 @@ rank-normalized multi-view consensus
 
 It aligns synchronized split-level Stage 3 probabilities, rank-normalizes each view, mean-fuses available views, detects consensus peaks, applies temporal NMS, and outputs one proposal stream per bout.
 
-Retained held-out Bout 115 result:
+The comparison below uses the same Bout 115 ground truth and strict one-to-one event-matching definition.
 
 | Method | Precision | Recall | Strict event F1 |
 |---|---:|---:|---:|
@@ -71,18 +71,22 @@ Retained held-out Bout 115 result:
 verified Kinetics VideoMAE features + matched per-fighter categorical fighter-query
 ```
 
-It uses proposal-centred synchronized panels and predicts fighter-specific states:
+It starts from Stage 4 consensus proposals, uses short synchronized multi-view panels, and predicts a separate state for each fighter:
 
 ```text
 null, body landed, head landed, blocked, missed
 ```
 
-Fair same-consensus comparison:
+The final retained Bout 115 evaluation was:
 
-| Method | Typed event F1 | Typed macro-F1 |
+| Metric | Result |
 |---|---:|---:|
-| Global-panel overlap mean baseline | 0.397 | 0.241 |
-| Matched fighter-query VideoMAE | 0.448 | 0.257 |
+| Typed event precision | 0.443 |
+| Typed event recall | 0.453 |
+| Typed event F1 | 0.448 |
+| Typed macro-F1 | 0.257 |
+
+For context, the archived original route used single-view 32-frame clips and eight-way clip classification. Its Bout 115 result was accuracy 0.204 and macro-F1 0.102. Because proposal construction, targets, and metrics changed, this is historical pipeline progress rather than a direct metric comparison. See `stage5_fighter_query_final/RESULTS.md` for the retained evaluation record and the included reproducibility artifact.
 
 ## What Is Excluded
 

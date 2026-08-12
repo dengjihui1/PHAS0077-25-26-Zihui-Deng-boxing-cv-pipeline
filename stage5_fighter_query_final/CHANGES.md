@@ -33,4 +33,4 @@ No existing clips, manifests, checkpoints, probabilities, or windows are modifie
 - Last-block proposal fine-tuning was stopped on validation after three monotonically
   worsening epochs; Bout 115 was not used to make the stopping decision.
 - SSV2, Kinetics+SSV2 concatenation, hierarchical labels, and validation-selected late
-  fusion were tested. None exceeded the retained 0.444 typed F1 and 0.254 macro-F1.
+  fusion were tested. None exceeded the final retained 0.448 typed F1 and 0.257 macro-F1.
