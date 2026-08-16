@@ -19,35 +19,62 @@ consensus** (Stage 4) and the **fighter-query outcome model** (Stage 5).
 Stages 1–3 are inherited from the original project (the supervisor's 2026 hand-off
 implementation); Stages 4–5 are the contributions of this dissertation.
 
-## Stage 3 punch finder in action
+## Stage 3 — punch finder
 
-The punch finder highlights frames where a strike occurs and displays the per-frame
-evidence used downstream.
+Stage 3 is a small windowed CNN that scores the central frame of every cropped context,
+emitting a per-frame punch probability that the later stages treat as evidence rather than
+a final decision.
 
-![Punch finder in action](docs/punchFinder_InAction.png)
+![Frame-level information exposed by the punch finder](docs/punchFinder_FrameInformation.png)
 
-![Frame-level information shown by the punch finder](docs/punchFinder_FrameInformation.png)
+The frame-level view shows what the punch finder exposes at each time step: the fighter
+crops it reads, the frame index, and the punch probability it emits for that frame. This
+per-frame trace is exactly the signal the multi-view consensus consumes in Stage 4.
+
+![Punch finder running over a bout](docs/punchFinder_InAction.png)
+
+Over a full bout, the punch finder highlights the frames where a strike occurs. This gives
+a direct visual check that the frame-level evidence tracks real punches before any
+downstream localisation is applied.
 
 ## Stage 4 — multi-view temporal consensus
 
-Synchronised views provide complementary evidence: an event weak in one camera is
-recovered from the others after rank normalisation and mean fusion.
+The original pipeline windowed each camera view independently, which was precise but
+missed many events. Stage 4 rank-normalises each view's probability trace, fuses the
+available views by their mean, and keeps local peaks as a single synchronised proposal
+stream.
 
-![Precision–recall movement from independent-view windowing to multi-view consensus](docs/fig_stage4_precision_recall_movement.png)
+![Precision–recall movement on held-out Bout 115](docs/fig_stage4_precision_recall_movement.png)
 
-![View-count ablation: more synchronised views improve strict event localisation](docs/fig_stage4_view_count_ablation.png)
+The precision–recall movement shows what the consensus buys: recall rises from 0.209 to
+0.754 while precision stays above 0.80, moving strict event F1 from 0.341 to 0.780.
+
+![View-count ablation on held-out Bout 115](docs/fig_stage4_view_count_ablation.png)
+
+The view-count ablation confirms the mechanism — strict event F1 grows with the number of
+synchronised views (0.661 with one view to 0.780 with three), so the cameras contribute
+complementary rather than redundant evidence.
 
 ## Stage 5 — fighter-query outcome model
 
-Each consensus peak anchors an 8-frame synchronised panel, encoded by a verified
-Kinetics-pretrained VideoMAE; red and blue fighter queries read the shared evidence and
-predict one five-state outcome per fighter.
+Each Stage 4 peak anchors an eight-frame synchronised panel. A verified Kinetics-pretrained
+VideoMAE encodes every view, and red/blue fighter queries read the shared evidence through
+separate identity slots to predict one five-state outcome per fighter (null, body landed,
+head landed, blocked, missed).
 
 ![Stage 5 fighter-query multi-view architecture](docs/fig_stage5_fighter_query_architecture.png)
 
-![Class support versus per-class F1: rare outcomes remain the bottleneck](docs/fig_stage5_support_vs_f1.png)
+![Class support versus per-class F1](docs/fig_stage5_support_vs_f1.png)
+
+The support-versus-F1 plot explains the remaining difficulty: body-landed and blocked
+outcomes have very few training examples and correspondingly weak recognition, while
+frequent outcomes such as missed are far more reliable.
 
 ![Pipeline bottleneck summary](docs/fig_pipeline_bottleneck_waterfall.png)
+
+The waterfall summarises the pipeline-level story — temporal localisation improves
+substantially, while fine-grained outcome recognition remains bounded by label scarcity
+and short RGB clips.
 
 ## Results (held-out Bout 115)
 
