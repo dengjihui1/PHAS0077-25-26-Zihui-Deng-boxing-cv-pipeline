@@ -5,11 +5,11 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT/core_pipeline"
-export PATH="/home/ubuntu/conda/bin:$PATH"
+export PATH="${BCV_CONDA_BIN:-/home/ubuntu/conda/bin}:$PATH"
 
 uv run python "$ROOT/stage5_fighter_query_final/train_fighter_matched.py" \
-  --features "$ROOT/stage5_fighter_query_final/data/features.npz" \
+  --features "${BCV_STAGE5_FEATURES:-$ROOT/stage5_fighter_query_final/data/features.npz}" \
   --pipeline-config configs/pipeline.yaml \
-  --output-dir "$ROOT/stage5_fighter_query_final/models_matched" \
+  --output-dir "${BCV_STAGE5_MODELS:-$ROOT/stage5_fighter_query_final/models_matched}" \
   --epochs 100 \
   --batch-size 64

@@ -1,10 +1,24 @@
 # Boxing CV — Multi-View Strike Localisation
 
-A five-stage computer-vision pipeline for boxing video analysis: it detects the two
-fighters in synchronised camera views, crops them, scores every frame for punch
-evidence, fuses the views into a single stream of strike proposals, and predicts each
-fighter's outcome. The core contribution of this work is the **multi-view temporal
-consensus** (Stage 4) and the **fighter-query outcome model** (Stage 5).
+Dissertation repository for localising boxing strikes from synchronised camera views
+and assigning a per-fighter outcome.
+
+| Held-out protocol | Stage 4 localisation | Stage 5 typed outcome |
+|---|---:|---:|
+| Bout 115; parameters selected without test use | Event F1 **0.780** · P 0.808 · R 0.754 | Typed event F1 **0.448** · macro-F1 **0.257** |
+
+> **Data availability:** Source videos, annotations, Stage-3 probabilities and trained
+> checkpoints are controlled project data and are not redistributed in this repository.
+> The code is public; the underlying data are available on request from the author.
+
+## Contributions
+
+1. **Rank-normalised multi-view temporal consensus** (Stage 4) that turns per-view punch
+   probabilities into a single synchronised stream of strike proposals.
+2. **Fighter-query VideoMAE outcome model** (Stage 5) over synchronised multi-view panels,
+   predicting a five-state outcome per fighter.
+3. **Held-out evaluation** on Bout 115 with leave-one-bout-out development checks and no
+   test-set tuning.
 
 ## Pipeline at a glance
 
@@ -76,17 +90,16 @@ The waterfall summarises the pipeline-level story — temporal localisation impr
 substantially, while fine-grained outcome recognition remains bounded by label scarcity
 and short RGB clips.
 
-## Results (held-out Bout 115)
+## Metric definitions
 
-| Stage | Method | Result |
-|---|---|---|
-| 4 | rank-normalised multi-view consensus | strict event F1 **0.341 → 0.780** (recall 0.209 → 0.754) |
-| 5 | fighter-query VideoMAE, argmax decoding | typed event F1 **0.448**, typed macro-F1 **0.257** |
-
-The archived original route (per-view windowing + 32-frame eight-way classification)
-scored 0.204 accuracy / 0.102 macro-F1 on the same bout; the two routes use different
-proposal, target and metric definitions, so the comparison indicates pipeline progress
-rather than a strictly matched metric change.
+- **Strict event F1** (Stage 4): one-to-one matching between predicted and ground-truth
+  strike events. A predicted window spans six frames on each side of its peak, and a window
+  matches a GT event when the two intervals overlap; each prediction and each GT event can
+  be matched only once. There is no additional temporal tolerance.
+- **Typed event F1** (Stage 5): a matched event must additionally carry the correct
+  fighter-specific outcome. The null state is removed, leaving eight labels (red/blue ×
+  body/head/blocked/missed).
+- **Typed macro-F1**: the mean of the eight per-class F1 scores.
 
 ## Repository layout
 
@@ -99,27 +112,30 @@ docs/                              figures used in this README
 
 ## Install and reproduce
 
-Python ≥ 3.11, managed with [uv](https://docs.astral.sh/uv/):
+Python ≥ 3.11, managed with [uv](https://docs.astral.sh/uv/). From the repository root:
 
 ```bash
 cd core_pipeline
 uv sync --extra detect --extra train --extra label
 uv run pytest -q          # 87 tests, offline, ~5 s
+cd ..
 ```
 
-The Stage 4 / Stage 5 experiment scripts are included so the runs can be repeated once
-the controlled bout data are restored:
+The Stage 4 → Stage 5 pipeline is five steps. Each `run_*.sh` documents its inputs and
+writes its outputs under the corresponding folder; override the `BCV_*` environment
+variables to point at your own data (defaults target the original server layout):
 
 ```bash
-bash stage4_multiview_consensus_final/run_cv.sh    # Stage 4 sweep + leave-one-bout-out
-bash stage5_fighter_query_final/run_build.sh       # Stage 5 feature cache
-bash stage5_fighter_query_final/run_matched.sh     # Stage 5 training
-bash stage5_fighter_query_final/run_evaluate.sh    # Stage 5 final evaluation
+bash stage4_multiview_consensus_final/run_cv.sh          # 1. sweep + leave-one-bout-out
+bash stage4_multiview_consensus_final/run_materialize.sh # 2. modal config -> robust windows
+bash stage5_fighter_query_final/run_build.sh             # 3. VideoMAE feature cache
+bash stage5_fighter_query_final/run_matched.sh           # 4. fighter-query training
+bash stage5_fighter_query_final/run_evaluate.sh          # 5. final held-out evaluation
 ```
 
-Bout videos, punch labels, fighter boxes, Stage-3 probabilities and trained checkpoints
-are controlled project data and are not bundled; each `run_*.sh` documents its expected
-inputs.
+Step 1 explores the parameter grid; step 2 writes the modal configuration's windows that
+step 3 consumes. Bout videos, punch labels, fighter boxes, Stage-3 probabilities and
+trained checkpoints are controlled project data and are not bundled.
 
 ## Results and provenance
 
