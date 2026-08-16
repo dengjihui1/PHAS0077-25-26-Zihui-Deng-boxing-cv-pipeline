@@ -63,21 +63,15 @@ rather than a strictly matched metric change.
 
 ## Report
 
-The full dissertation is in [`report/`](report/):
-
-- [`report/report.pdf`](report/report.pdf) — compiled PDF (42 pages);
-- [`report/elsarticle-template-num.tex`](report/elsarticle-template-num.tex) — LaTeX source;
-- [`report/cas-refs.bib`](report/cas-refs.bib) — bibliography;
-- `report/FIG1.png … FIG7.png`, `report/fig_stage4_*.pdf`, `report/fig_stage5_*.pdf` — all report figures.
+The full dissertation (compiled PDF, 42 pages): [`report/report.pdf`](report/report.pdf).
 
 ## Repository layout
 
 ```text
-report/                            dissertation (LaTeX source, figures, compiled PDF)
+report/                            dissertation (report.pdf)
 core_pipeline/                     inherited five-stage package (bcv) + tests
 stage4_multiview_consensus_final/  Stage 4 multi-view consensus (this work)
 stage5_fighter_query_final/        Stage 5 fighter-query classifier (this work)
-report_analysis/                   script + CSVs behind the report figures/tables
 docs/                              figures used in this README
 ```
 
@@ -112,4 +106,3 @@ inputs.
 - `stage5_fighter_query_final/results/final_retained_result.json` — final Stage 5 numbers.
 - `stage5_fighter_query_final/results/disentangled_result.json` — clean-GT and activity
   diagnostics.
-- `report_analysis/` — CSV tables behind the report figures.
