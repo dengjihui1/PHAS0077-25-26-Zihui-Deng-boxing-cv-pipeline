@@ -61,14 +61,9 @@ scored 0.204 accuracy / 0.102 macro-F1 on the same bout; the two routes use diff
 proposal, target and metric definitions, so the comparison indicates pipeline progress
 rather than a strictly matched metric change.
 
-## Report
-
-The full dissertation (compiled PDF, 42 pages): [`report/report.pdf`](report/report.pdf).
-
 ## Repository layout
 
 ```text
-report/                            dissertation (report.pdf)
 core_pipeline/                     inherited five-stage package (bcv) + tests
 stage4_multiview_consensus_final/  Stage 4 multi-view consensus (this work)
 stage5_fighter_query_final/        Stage 5 fighter-query classifier (this work)
