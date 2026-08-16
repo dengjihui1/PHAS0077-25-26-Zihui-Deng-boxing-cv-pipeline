@@ -77,7 +77,7 @@ Python ≥ 3.11, managed with [uv](https://docs.astral.sh/uv/):
 ```bash
 cd core_pipeline
 uv sync --extra detect --extra train --extra label
-uv run pytest -q          # 80 tests, offline, ~5 s
+uv run pytest -q          # 87 tests, offline, ~5 s
 ```
 
 The Stage 4 / Stage 5 experiment scripts are included so the runs can be repeated once
@@ -101,3 +101,11 @@ inputs.
 - `stage5_fighter_query_final/results/final_retained_result.json` — final Stage 5 numbers.
 - `stage5_fighter_query_final/results/disentangled_result.json` — clean-GT and activity
   diagnostics.
+
+## Acknowledgements
+
+I would like to express my sincere gratitude to the PhD students Brian Chiang, Luke
+Johnson and Melik Oughton for their foundational research and code, on which this project
+builds, and to SWA for generously providing the data and information used throughout this
+work. I am also deeply grateful to my supervisors, Gabriel Facini and Nikita Pond, for
+their invaluable guidance, encouragement and support.
