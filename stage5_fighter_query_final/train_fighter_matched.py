@@ -103,6 +103,10 @@ class FighterQueryModel(nn.Module):
         batch, views = features.shape[:2]
         if features.ndim == 5:
             fighters, temporal = features.shape[2:4]
+            if temporal != self.temporal_pos.shape[2]:
+                raise ValueError(
+                    f"temporal_pos has {self.temporal_pos.shape[2]} bins but features have {temporal}"
+                )
             tokens = self.proj(features) + self.temporal_pos[:, :, None, :temporal]
             flat = tokens.reshape(batch * views * fighters, temporal, -1)
             temporal_query = self.temporal_query.expand(batch * views * fighters, -1, -1)
@@ -124,6 +128,10 @@ class FighterQueryModel(nn.Module):
             fighter_features = fighter_features.reshape(batch, fighters, -1)
         else:
             temporal = features.shape[2]
+            if temporal != self.temporal_pos.shape[2]:
+                raise ValueError(
+                    f"temporal_pos has {self.temporal_pos.shape[2]} bins but features have {temporal}"
+                )
             tokens = self.proj(features) + self.temporal_pos[:, :, :temporal]
             flat = tokens.reshape(batch * views, temporal, -1)
             temporal_query = self.temporal_query.expand(batch * views, -1, -1)

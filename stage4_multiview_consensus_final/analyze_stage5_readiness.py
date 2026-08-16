@@ -1,4 +1,9 @@
-"""Audit fixed-length Stage-5 labels around robust consensus peaks."""
+"""Audit fixed-length Stage-5 labels around robust consensus peaks.
+
+Diagnostic only: it inspects label purity and peak-tolerance recall on every bout,
+including the held-out test bout 115. The output is never used for parameter or model
+selection; Bout 115 is included purely so the final test numbers can be sanity-checked.
+"""
 
 from __future__ import annotations
 

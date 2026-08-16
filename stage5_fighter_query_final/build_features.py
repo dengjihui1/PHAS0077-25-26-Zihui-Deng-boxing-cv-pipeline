@@ -444,6 +444,9 @@ def main() -> None:
             flush()
             print(f"{bout}/{split}: {valid} valid, {rejected} rejected", flush=True)
 
+    # These overlap-based multi-label targets only feed the manifest/summary stats.
+    # Training rebuilds one-to-one per-fighter targets via build_matched_targets, so
+    # this field is deliberately not used by the model.
     targets = np.asarray([row["target"] for row in proposals], dtype=np.uint8)
     bouts_array = np.asarray([row["bout"] for row in proposals], dtype=np.int16)
     peaks = np.asarray([row["peak_frame"] for row in proposals], dtype=np.int32)

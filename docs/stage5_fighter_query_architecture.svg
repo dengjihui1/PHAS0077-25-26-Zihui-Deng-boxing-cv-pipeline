@@ -1,0 +1,359 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-labelledby="title desc">
+  <title id="title">Stage 5: Fighter-Query Multi-View Strike Classification</title>
+  <desc id="desc">Publication-quality architecture diagram showing synchronized multi-view input, a shared VideoMAE representation, fighter-specific prediction, and a separate training supervision branch.</desc>
+
+  <defs>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #202428; letter-spacing: 0; }
+      .section { font-size: 17px; font-weight: 700; letter-spacing: 1.8px; fill: #596168; }
+      .module-title { font-size: 23px; font-weight: 700; }
+      .label { font-size: 18px; font-weight: 600; }
+      .small { font-size: 15px; fill: #555d63; }
+      .tiny { font-size: 13px; fill: #60686e; }
+      .hairline { stroke: #4c5358; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .border { stroke: #aeb5ba; stroke-width: 1.6; }
+    </style>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#444b50"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#c73b45"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#3477bf"/>
+    </marker>
+    <symbol id="camera" viewBox="0 0 40 28">
+      <rect x="2" y="5" width="26" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M28 10 L38 6 L38 22 L28 18 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="11" cy="14" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    </symbol>
+    <symbol id="fighter" viewBox="0 0 34 48">
+      <circle cx="14" cy="6" r="4.5" fill="currentColor"/>
+      <path d="M14 12 L13 27 M13 16 L5 22 M13 17 L23 15 M13 27 L6 42 M13 27 L22 42" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="25" cy="15" r="3.2" fill="currentColor"/>
+      <circle cx="4" cy="23" r="3.2" fill="currentColor"/>
+    </symbol>
+    <symbol id="tensor" viewBox="0 0 54 48">
+      <path d="M8 14 L33 14 L46 4 L21 4 Z M33 14 L33 39 L46 29 L46 4 M8 14 L8 39 L33 39" fill="#eceff1" stroke="#4c5358" stroke-width="1.8" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+
+  <rect width="1920" height="1080" fill="#ffffff"/>
+
+  <!-- Title -->
+  <text x="70" y="70" font-size="43" font-weight="700">Stage 5: Fighter-Query Multi-View Strike Classification</text>
+  <line x1="70" y1="92" x2="1850" y2="92" stroke="#d7dbde" stroke-width="1.5"/>
+
+  <!-- Zone 1 -->
+  <text class="section" x="72" y="132">SYNCHRONIZED INPUT</text>
+  <rect x="70" y="148" width="1780" height="222" rx="10" fill="#fafbfb" class="border"/>
+
+  <!-- Stage 4 peak marker -->
+  <g transform="translate(94 191)">
+    <line x1="24" y1="2" x2="24" y2="91" stroke="#4c5358" stroke-width="2"/>
+    <path d="M24 4 L70 20 L24 38 Z" fill="#dfe3e5" stroke="#4c5358" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M7 74 L18 74 L24 53 L31 74 L54 74" fill="none" stroke="#c73b45" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="38" y="119" text-anchor="middle" class="label">Stage 4</text>
+    <text x="38" y="141" text-anchor="middle" class="small">temporal peak</text>
+  </g>
+
+  <line x1="202" y1="174" x2="202" y2="342" stroke="#c7ccd0" stroke-width="1.5" stroke-dasharray="5 7"/>
+
+  <!-- Compact camera rig -->
+  <g transform="translate(235 185)" color="#555d63">
+    <circle cx="77" cy="64" r="15" fill="#ffffff" stroke="#555d63" stroke-width="1.8"/>
+    <path d="M70 64 h14 M77 57 v14" class="hairline"/>
+    <line x1="61" y1="54" x2="42" y2="36" class="hairline"/>
+    <line x1="92" y1="54" x2="111" y2="36" class="hairline"/>
+    <line x1="61" y1="75" x2="42" y2="94" class="hairline"/>
+    <line x1="92" y1="75" x2="111" y2="94" class="hairline"/>
+    <use href="#camera" x="9" y="8" width="40" height="28"/>
+    <use href="#camera" x="106" y="8" width="40" height="28"/>
+    <use href="#camera" x="9" y="92" width="40" height="28"/>
+    <use href="#camera" x="106" y="92" width="40" height="28"/>
+    <text x="77" y="145" text-anchor="middle" class="small">multi-camera rig</text>
+  </g>
+
+  <path d="M400 259 H440" class="hairline" marker-end="url(#arrow)"/>
+
+  <text x="1115" y="178" text-anchor="middle" class="module-title">8-frame synchronized multi-view panel</text>
+
+  <!-- Synchronized frame thumbnails -->
+  <g transform="translate(460 203)">
+    <line x1="176" y1="-8" x2="176" y2="154" stroke="#d2d7da" stroke-width="1.2" stroke-dasharray="4 5"/>
+    <line x1="428" y1="-8" x2="428" y2="154" stroke="#d2d7da" stroke-width="1.2" stroke-dasharray="4 5"/>
+    <line x1="680" y1="-8" x2="680" y2="154" stroke="#d2d7da" stroke-width="1.2" stroke-dasharray="4 5"/>
+    <line x1="932" y1="-8" x2="932" y2="154" stroke="#d2d7da" stroke-width="1.2" stroke-dasharray="4 5"/>
+
+    <g>
+      <rect x="0" y="0" width="230" height="132" rx="5" fill="#ffffff" stroke="#858d93" stroke-width="1.6"/>
+      <use href="#camera" x="13" y="10" width="20" height="14" color="#596168"/>
+      <text x="39" y="23" class="tiny">view 1</text>
+      <use href="#fighter" x="69" y="42" width="37" height="56" color="#c73b45"/>
+      <g transform="translate(165 42) scale(-1 1)"><use href="#fighter" width="37" height="56" color="#3477bf"/></g>
+      <path d="M99 62 H130" stroke="#c73b45" stroke-width="3" stroke-linecap="round"/>
+      <path d="M161 62 H130" stroke="#3477bf" stroke-width="3" stroke-linecap="round"/>
+      <text x="209" y="118" text-anchor="end" font-size="17" font-style="italic">t−2</text>
+    </g>
+
+    <g transform="translate(252 0)">
+      <rect x="0" y="0" width="230" height="132" rx="5" fill="#ffffff" stroke="#858d93" stroke-width="1.6"/>
+      <use href="#camera" x="13" y="10" width="20" height="14" color="#596168"/>
+      <text x="39" y="23" class="tiny">view 2</text>
+      <use href="#fighter" x="66" y="42" width="37" height="56" color="#c73b45"/>
+      <g transform="translate(169 42) scale(-1 1)"><use href="#fighter" width="37" height="56" color="#3477bf"/></g>
+      <path d="M98 62 H137" stroke="#c73b45" stroke-width="3" stroke-linecap="round"/>
+      <path d="M165 62 H137" stroke="#3477bf" stroke-width="3" stroke-linecap="round"/>
+      <text x="209" y="118" text-anchor="end" font-size="17" font-style="italic">t</text>
+    </g>
+
+    <g transform="translate(504 0)">
+      <rect x="0" y="0" width="230" height="132" rx="5" fill="#ffffff" stroke="#858d93" stroke-width="1.6"/>
+      <use href="#camera" x="13" y="10" width="20" height="14" color="#596168"/>
+      <text x="39" y="23" class="tiny">view 3</text>
+      <use href="#fighter" x="72" y="42" width="37" height="56" color="#c73b45"/>
+      <g transform="translate(162 42) scale(-1 1)"><use href="#fighter" width="37" height="56" color="#3477bf"/></g>
+      <path d="M102 61 H129" stroke="#c73b45" stroke-width="3" stroke-linecap="round"/>
+      <path d="M159 61 H129" stroke="#3477bf" stroke-width="3" stroke-linecap="round"/>
+      <text x="209" y="118" text-anchor="end" font-size="17" font-style="italic">t</text>
+    </g>
+
+    <g transform="translate(756 0)">
+      <rect x="0" y="0" width="230" height="132" rx="5" fill="#ffffff" stroke="#858d93" stroke-width="1.6"/>
+      <use href="#camera" x="13" y="10" width="20" height="14" color="#596168"/>
+      <text x="39" y="23" class="tiny">view 4</text>
+      <use href="#fighter" x="77" y="42" width="37" height="56" color="#c73b45"/>
+      <g transform="translate(157 42) scale(-1 1)"><use href="#fighter" width="37" height="56" color="#3477bf"/></g>
+      <path d="M108 61 H128" stroke="#c73b45" stroke-width="3" stroke-linecap="round"/>
+      <path d="M154 61 H128" stroke="#3477bf" stroke-width="3" stroke-linecap="round"/>
+      <text x="209" y="118" text-anchor="end" font-size="17" font-style="italic">t+2</text>
+    </g>
+
+    <g transform="translate(1010 37)">
+      <circle cx="21" cy="28" r="20" fill="#ffffff" stroke="#858d93" stroke-width="1.6"/>
+      <path d="M21 16 V28 L29 33" class="hairline"/>
+      <path d="M10 9 L14 4 M32 9 L28 4" class="hairline"/>
+      <path d="M50 28 H92" class="hairline" marker-end="url(#arrow)"/>
+      <text x="21" y="67" text-anchor="middle" class="tiny">sync</text>
+    </g>
+  </g>
+
+  <!-- Zone 2 -->
+  <text class="section" x="72" y="414">SHARED VIDEO REPRESENTATION</text>
+  <rect x="70" y="430" width="1780" height="252" rx="10" fill="#fafbfb" class="border"/>
+
+  <!-- Shared encoder -->
+  <g transform="translate(92 455)">
+    <rect x="0" y="0" width="760" height="202" rx="8" fill="#f1f3f4" stroke="#555d63" stroke-width="1.8"/>
+    <text x="380" y="34" text-anchor="middle" class="module-title">Verified Kinetics-pretrained VideoMAE</text>
+    <text x="380" y="57" text-anchor="middle" class="small">shared visual encoder</text>
+
+    <!-- video-token grid -->
+    <g transform="translate(38 78)">
+      <g fill="#d9dde0" stroke="#6b7379" stroke-width="1">
+        <rect x="0" y="0" width="24" height="20"/><rect x="26" y="0" width="24" height="20"/><rect x="52" y="0" width="24" height="20"/><rect x="78" y="0" width="24" height="20"/>
+        <rect x="0" y="22" width="24" height="20"/><rect x="26" y="22" width="24" height="20" fill="#bfc5c9"/><rect x="52" y="22" width="24" height="20"/><rect x="78" y="22" width="24" height="20"/>
+        <rect x="0" y="44" width="24" height="20"/><rect x="26" y="44" width="24" height="20"/><rect x="52" y="44" width="24" height="20" fill="#bfc5c9"/><rect x="78" y="44" width="24" height="20"/>
+      </g>
+      <text x="51" y="88" text-anchor="middle" class="tiny">video-token grid</text>
+    </g>
+
+    <!-- temporal token strip -->
+    <g transform="translate(195 99)">
+      <g fill="#d9dde0" stroke="#6b7379" stroke-width="1">
+        <rect x="0" y="0" width="22" height="22"/><rect x="24" y="0" width="22" height="22"/><rect x="48" y="0" width="22" height="22"/><rect x="72" y="0" width="22" height="22" fill="#b7bdc1"/><rect x="96" y="0" width="22" height="22"/><rect x="120" y="0" width="22" height="22"/>
+      </g>
+      <line x1="11" y1="-14" x2="131" y2="-14" stroke="#697177" stroke-width="1.5"/>
+      <path d="M11 -18 V-10 M131 -18 V-10" stroke="#697177" stroke-width="1.5"/>
+      <text x="71" y="46" text-anchor="middle" class="tiny">temporal token strip</text>
+    </g>
+
+    <!-- camera-view token groups -->
+    <g transform="translate(402 81)">
+      <g stroke="#6b7379" stroke-width="1">
+        <g fill="#e6e9eb"><rect x="0" y="0" width="22" height="18"/><rect x="24" y="0" width="22" height="18"/><rect x="48" y="0" width="22" height="18"/></g>
+        <g fill="#d8dde0"><rect x="6" y="24" width="22" height="18"/><rect x="30" y="24" width="22" height="18"/><rect x="54" y="24" width="22" height="18"/></g>
+        <g fill="#cbd1d5"><rect x="12" y="48" width="22" height="18"/><rect x="36" y="48" width="22" height="18"/><rect x="60" y="48" width="22" height="18"/></g>
+      </g>
+      <text x="41" y="89" text-anchor="middle" class="tiny">camera-view token groups</text>
+    </g>
+
+    <!-- feature tensor -->
+    <g transform="translate(607 82)">
+      <use href="#tensor" width="62" height="56"/>
+      <text x="31" y="88" text-anchor="middle" class="tiny">feature tensor</text>
+    </g>
+  </g>
+
+  <path d="M852 556 H886" class="hairline" marker-end="url(#arrow)"/>
+
+  <!-- Temporal attention -->
+  <g transform="translate(895 455)">
+    <rect x="0" y="0" width="330" height="202" rx="8" fill="#f1f3f4" stroke="#555d63" stroke-width="1.8"/>
+    <text x="165" y="35" text-anchor="middle" class="module-title">Temporal attention</text>
+    <g transform="translate(35 84)">
+      <line x1="0" y1="30" x2="258" y2="30" stroke="#92999e" stroke-width="1.2"/>
+      <g stroke="#6b7379" stroke-width="1.1">
+        <rect x="0" y="18" width="28" height="24" fill="#dde1e3"/>
+        <rect x="32" y="18" width="28" height="24" fill="#dde1e3"/>
+        <rect x="64" y="18" width="28" height="24" fill="#f2c9cd" stroke="#c73b45"/>
+        <rect x="96" y="18" width="28" height="24" fill="#dde1e3"/>
+        <rect x="128" y="18" width="28" height="24" fill="#f2c9cd" stroke="#c73b45"/>
+        <rect x="160" y="18" width="28" height="24" fill="#dde1e3"/>
+        <rect x="192" y="18" width="28" height="24" fill="#f2c9cd" stroke="#c73b45"/>
+        <rect x="224" y="18" width="28" height="24" fill="#dde1e3"/>
+      </g>
+      <path d="M78 6 V-12 M142 6 V-12 M206 6 V-12" stroke="#c73b45" stroke-width="2"/>
+      <text x="126" y="72" text-anchor="middle" class="small">time positions</text>
+    </g>
+  </g>
+
+  <path d="M1225 556 H1259" class="hairline" marker-end="url(#arrow)"/>
+
+  <!-- Masked cross-view attention -->
+  <g transform="translate(1268 455)">
+    <rect x="0" y="0" width="560" height="202" rx="8" fill="#f1f3f4" stroke="#555d63" stroke-width="1.8"/>
+    <text x="280" y="35" text-anchor="middle" class="module-title">Masked cross-view attention</text>
+    <g transform="translate(58 68)">
+      <!-- token-to-token pattern -->
+      <g fill="#d8dde0" stroke="#6b7379" stroke-width="1.1">
+        <rect x="0" y="0" width="22" height="22"/><rect x="0" y="34" width="22" height="22"/><rect x="0" y="68" width="22" height="22"/>
+        <rect x="150" y="0" width="22" height="22"/><rect x="150" y="34" width="22" height="22"/><rect x="150" y="68" width="22" height="22"/>
+      </g>
+      <g stroke="#7c8489" stroke-width="1.3" fill="none">
+        <path d="M22 11 L150 45"/><path d="M22 11 L150 79"/><path d="M22 45 L150 11"/><path d="M22 45 L150 79"/><path d="M22 79 L150 11"/><path d="M22 79 L150 45"/>
+      </g>
+      <text x="86" y="111" text-anchor="middle" class="tiny">cross-view links</text>
+
+      <path d="M202 45 H245" class="hairline" marker-end="url(#arrow)"/>
+
+      <!-- variable-view mask -->
+      <g transform="translate(270 0)">
+        <g stroke="#6b7379" stroke-width="1.1">
+          <rect x="0" y="0" width="24" height="24" fill="#d9dde0"/><rect x="30" y="0" width="24" height="24" fill="#ffffff"/><rect x="60" y="0" width="24" height="24" fill="#d9dde0"/>
+          <rect x="0" y="30" width="24" height="24" fill="#ffffff"/><rect x="30" y="30" width="24" height="24" fill="#d9dde0"/><rect x="60" y="30" width="24" height="24" fill="#ffffff"/>
+          <rect x="0" y="60" width="24" height="24" fill="#d9dde0"/><rect x="30" y="60" width="24" height="24" fill="#ffffff"/><rect x="60" y="60" width="24" height="24" fill="#d9dde0"/>
+        </g>
+        <path d="M3 3 L21 21 M21 3 L3 21 M63 3 L81 21 M81 3 L63 21 M33 63 L51 81 M51 63 L33 81" stroke="#c73b45" stroke-width="2.2"/>
+        <text x="42" y="111" text-anchor="middle" class="small">variable-view mask</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Clean cross-zone connector -->
+  <path d="M1548 657 V706 H935 V751" fill="none" stroke="#4c5358" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+
+  <!-- Zone 3 -->
+  <text class="section" x="72" y="726">FIGHTER-SPECIFIC PREDICTION</text>
+  <rect x="70" y="742" width="1780" height="228" rx="10" fill="#fafbfb" class="border"/>
+
+  <!-- Red query lane -->
+  <g transform="translate(98 770)">
+    <use href="#fighter" x="0" y="0" width="35" height="50" color="#c73b45"/>
+    <text x="54" y="31" class="label" fill="#a82d36">Red fighter query</text>
+    <path d="M218 26 H310" fill="none" stroke="#c73b45" stroke-width="2.6" marker-end="url(#arrowRed)"/>
+    <rect x="335" y="9" width="34" height="34" rx="3" fill="#f7e1e4" stroke="#c73b45" stroke-width="1.8"/>
+    <path d="M342 19 H362 M342 26 H362 M342 33 H355" stroke="#c73b45" stroke-width="1.6"/>
+    <text x="386" y="31" class="small">query token</text>
+    <path d="M480 26 H535" fill="none" stroke="#c73b45" stroke-width="2.6" marker-end="url(#arrowRed)"/>
+  </g>
+
+  <!-- Blue query lane -->
+  <g transform="translate(98 875)">
+    <use href="#fighter" x="0" y="0" width="35" height="50" color="#3477bf"/>
+    <text x="54" y="31" class="label" fill="#2867a9">Blue fighter query</text>
+    <path d="M218 26 H310" fill="none" stroke="#3477bf" stroke-width="2.6" marker-end="url(#arrowBlue)"/>
+    <rect x="335" y="9" width="34" height="34" rx="3" fill="#e2edf8" stroke="#3477bf" stroke-width="1.8"/>
+    <path d="M342 19 H362 M342 26 H362 M342 33 H355" stroke="#3477bf" stroke-width="1.6"/>
+    <text x="386" y="31" class="small">query embedding</text>
+    <path d="M480 26 H535" fill="none" stroke="#3477bf" stroke-width="2.6" marker-end="url(#arrowBlue)"/>
+  </g>
+
+  <!-- Shared interaction block -->
+  <g transform="translate(640 766)">
+    <rect x="0" y="0" width="630" height="180" rx="8" fill="#f1f3f4" stroke="#555d63" stroke-width="1.8"/>
+    <text x="315" y="31" text-anchor="middle" font-size="19" font-weight="700">self feature + opponent context + feature difference</text>
+
+    <g transform="translate(44 60)">
+      <g fill="#d9dde0" stroke="#6b7379" stroke-width="1">
+        <rect x="0" y="0" width="26" height="28"/><rect x="28" y="0" width="26" height="28"/><rect x="56" y="0" width="26" height="28" fill="#bbc2c7"/><rect x="84" y="0" width="26" height="28"/>
+      </g>
+      <text x="55" y="52" text-anchor="middle" class="small">self feature</text>
+    </g>
+
+    <text x="208" y="83" text-anchor="middle" font-size="24" fill="#697177">+</text>
+
+    <g transform="translate(244 60)">
+      <g fill="#d9dde0" stroke="#6b7379" stroke-width="1">
+        <rect x="0" y="0" width="26" height="28"/><rect x="28" y="0" width="26" height="28" fill="#bbc2c7"/><rect x="56" y="0" width="26" height="28"/><rect x="84" y="0" width="26" height="28"/>
+      </g>
+      <text x="55" y="52" text-anchor="middle" class="small">opponent context</text>
+    </g>
+
+    <text x="407" y="83" text-anchor="middle" font-size="24" fill="#697177">+</text>
+
+    <g transform="translate(448 60)">
+      <g stroke="#6b7379" stroke-width="1">
+        <rect x="0" y="0" width="26" height="28" fill="#f2c9cd"/><rect x="28" y="0" width="26" height="28" fill="#d9dde0"/><rect x="56" y="0" width="26" height="28" fill="#d8e7f5"/><rect x="84" y="0" width="26" height="28" fill="#d9dde0"/>
+      </g>
+      <text x="55" y="48" text-anchor="middle" class="small">self–opponent</text>
+      <text x="55" y="68" text-anchor="middle" class="small">difference</text>
+    </g>
+
+    <line x1="315" y1="142" x2="315" y2="161" stroke="#858d93" stroke-width="1.4"/>
+    <circle cx="315" cy="166" r="4" fill="#555d63"/>
+  </g>
+
+  <!-- Symmetric outputs -->
+  <path d="M1270 808 H1317" fill="none" stroke="#c73b45" stroke-width="2.6" marker-end="url(#arrowRed)"/>
+  <g transform="translate(1335 773)">
+    <rect x="0" y="0" width="478" height="73" rx="6" fill="#f9e9eb" stroke="#c73b45" stroke-width="1.7"/>
+    <circle cx="27" cy="23" r="8" fill="#c73b45"/>
+    <text x="48" y="29" font-size="20" font-weight="700" fill="#a82d36">Red state</text>
+    <g transform="translate(27 44)">
+      <circle cx="0" cy="0" r="4" fill="#c73b45"/><circle cx="78" cy="0" r="4" fill="#c73b45"/><circle cx="189" cy="0" r="4" fill="#c73b45"/><circle cx="302" cy="0" r="4" fill="#c73b45"/><circle cx="394" cy="0" r="4" fill="#c73b45"/>
+      <line x1="0" y1="0" x2="394" y2="0" stroke="#d9a8ad" stroke-width="1.2"/>
+    </g>
+    <text x="239" y="66" text-anchor="middle" class="tiny">null | body landed | head landed | blocked | missed</text>
+  </g>
+
+  <path d="M1270 903 H1317" fill="none" stroke="#3477bf" stroke-width="2.6" marker-end="url(#arrowBlue)"/>
+  <g transform="translate(1335 868)">
+    <rect x="0" y="0" width="478" height="73" rx="6" fill="#e8f1fa" stroke="#3477bf" stroke-width="1.7"/>
+    <circle cx="27" cy="23" r="8" fill="#3477bf"/>
+    <text x="48" y="29" font-size="20" font-weight="700" fill="#2867a9">Blue state</text>
+    <g transform="translate(27 44)">
+      <circle cx="0" cy="0" r="4" fill="#3477bf"/><circle cx="78" cy="0" r="4" fill="#3477bf"/><circle cx="189" cy="0" r="4" fill="#3477bf"/><circle cx="302" cy="0" r="4" fill="#3477bf"/><circle cx="394" cy="0" r="4" fill="#3477bf"/>
+      <line x1="0" y1="0" x2="394" y2="0" stroke="#a8c5e1" stroke-width="1.2"/>
+    </g>
+    <text x="239" y="66" text-anchor="middle" class="tiny">null | body landed | head landed | blocked | missed</text>
+  </g>
+
+  <!-- Training supervision branch -->
+  <path d="M955 946 V995" fill="none" stroke="#6b7379" stroke-width="1.8" stroke-dasharray="6 6" marker-end="url(#arrow)"/>
+  <g transform="translate(500 988)">
+    <rect x="0" y="0" width="1328" height="72" rx="7" fill="#ffffff" stroke="#6b7379" stroke-width="1.7" stroke-dasharray="7 6"/>
+    <text x="22" y="37" class="label">Training target construction</text>
+
+    <!-- GT annotation icon -->
+    <g transform="translate(312 14)">
+      <path d="M0 0 H31 L43 12 V44 H0 Z" fill="#f1f3f4" stroke="#596168" stroke-width="1.6"/>
+      <path d="M31 0 V12 H43" fill="none" stroke="#596168" stroke-width="1.6"/>
+      <text x="21" y="29" text-anchor="middle" font-size="15" font-weight="700">GT</text>
+    </g>
+
+    <!-- matching symbol -->
+    <g transform="translate(382 22)">
+      <circle cx="0" cy="8" r="5" fill="#c73b45"/><circle cx="58" cy="8" r="5" fill="#3477bf"/>
+      <path d="M7 8 H25 L33 0 M33 16 L25 8 H51" fill="none" stroke="#596168" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <g transform="translate(475 13)">
+      <circle cx="8" cy="10" r="6" fill="#c73b45"/><rect x="0" y="25" width="16" height="16" rx="2" fill="#f7e1e4" stroke="#c73b45" stroke-width="1.4"/>
+      <circle cx="40" cy="10" r="6" fill="#3477bf"/><rect x="32" y="25" width="16" height="16" rx="2" fill="#e2edf8" stroke="#3477bf" stroke-width="1.4"/>
+    </g>
+
+    <text x="552" y="28" class="label">Per-fighter one-to-one GT matching</text>
+    <text x="552" y="53" class="label">Unmatched proposal → null</text>
+  </g>
+</svg>

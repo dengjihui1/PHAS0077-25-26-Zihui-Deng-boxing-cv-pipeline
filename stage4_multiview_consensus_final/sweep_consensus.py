@@ -82,11 +82,12 @@ def in_round_mask(frames: np.ndarray, rounds: list[tuple[int, int]]) -> np.ndarr
 
 
 def _fractional_rank(values: np.ndarray) -> np.ndarray:
-    """Average fractional rank of ``values`` in (0, 1].
+    """Fractional rank ``(rank - 0.5) / N`` in (0, 1], ties sharing the block centre.
 
-    Tied values get one shared rank: ``(min_pos + max_pos) / 2 + 0.5`` is the
-    0-based centre of the tie block, normalised by the number of values. Plain
-    ``argsort`` would hand each tie a different rank and skew the consensus.
+    ``rank`` is the 1-based position, so the largest value maps to ``(N - 0.5) / N``.
+    Plain ``argsort`` would hand each tie a different rank and skew the cross-view
+    consensus, so the block centre is used instead. The ``0.5 / N`` offset only
+    rescales the axis and never changes the ordering.
     """
     order = np.argsort(values, kind="mergesort")
     ranks = np.empty(len(values), dtype=np.float64)
@@ -462,6 +463,9 @@ def main() -> None:
         if index % 300 == 0:
             print(f"swept {index} parameter sets", flush=True)
 
+    # Best-on-validation selection (Bout 122 only). Note the final reported
+    # configuration is the leave-one-bout-out modal params in materialize_robust.py,
+    # not this single-validation best; the two can differ slightly.
     sweep = pd.DataFrame(sweep_rows).sort_values(
         ["val_f1", "train_f1", "val_clean_fraction"], ascending=False
     )

@@ -26,6 +26,10 @@ from sweep_consensus import (
 )
 
 
+# Modal configuration across the five leave-one-bout-out folds in
+# sweep_consensus.py (each fold selected rank / mean / 0.80 / 6 / 6). This is the
+# configuration reported in the paper; the single-validation best in sweep_consensus
+# (rank / median / 0.85 / 4) was rejected in favour of this more stable choice.
 ROBUST_PARAMS = Params(
     normalization="rank",
     fusion="mean",
