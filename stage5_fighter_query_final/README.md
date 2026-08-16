@@ -17,9 +17,7 @@ The retained final Bout 115 result is typed event precision 0.443, recall 0.453,
 clean code package.
 
 ```bash
-nohup bash Zihui/stage5_multiview_structured_20260728/run_build.sh \
-  > Zihui/stage5_multiview_structured_20260728/build.log 2>&1 &
-
-nohup bash Zihui/stage5_multiview_structured_20260728/run_matched.sh \
-  > Zihui/stage5_multiview_structured_20260728/train.log 2>&1 &
+nohup bash run_build.sh   > build.log    2>&1 &
+nohup bash run_matched.sh > train.log    2>&1 &
+nohup bash run_evaluate.sh > evaluate.log 2>&1 &
 ```

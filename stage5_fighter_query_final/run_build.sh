@@ -1,14 +1,20 @@
 #!/usr/bin/env bash
+# Stage 5 feature build: 8-frame VideoMAE panels around Stage-4 consensus peaks.
+#
+# Needs the robust consensus windows (materialize_robust.py output) and the raw
+# bout videos. Point WINDOWS_DIR at your robust_windows folder.
 set -euo pipefail
 
-cd /home/ubuntu/boxing-cv-pipeline
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT/core_pipeline"
 export PATH="/home/ubuntu/conda/bin:$PATH"
 
-OUT="Zihui/stage5_multiview_structured_20260728/data"
+WINDOWS_DIR="$ROOT/stage4_multiview_consensus_final/results_cv/robust_windows"
+OUT="$ROOT/stage5_fighter_query_final/data"
 mkdir -p "$OUT"
 
-uv run python Zihui/stage5_multiview_structured_20260728/build_features.py \
+uv run python "$ROOT/stage5_fighter_query_final/build_features.py" \
   --pipeline-config configs/pipeline.yaml \
-  --windows-dir Zihui/stage4_multiview_consensus_20260727/results_cv/robust_windows \
+  --windows-dir "$WINDOWS_DIR" \
   --output-dir "$OUT" \
   --batch-size 8

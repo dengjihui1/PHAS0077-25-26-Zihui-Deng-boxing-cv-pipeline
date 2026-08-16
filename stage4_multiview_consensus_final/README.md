@@ -31,6 +31,6 @@ configuration's final metrics and synchronized windows for downstream Stage 5 us
 ## Run
 
 ```bash
-nohup bash Zihui/stage4_multiview_consensus_20260727/run.sh \
-  > Zihui/stage4_multiview_consensus_20260727/train.log 2>&1 &
+nohup bash run.sh    > train.log  2>&1 &
+nohup bash run_cv.sh > train_cv.log 2>&1 &
 ```

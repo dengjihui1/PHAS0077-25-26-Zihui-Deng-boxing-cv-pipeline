@@ -81,7 +81,28 @@ def in_round_mask(frames: np.ndarray, rounds: list[tuple[int, int]]) -> np.ndarr
     return mask
 
 
+def _fractional_rank(values: np.ndarray) -> np.ndarray:
+    """Average fractional rank of ``values`` in (0, 1].
+
+    Tied values get one shared rank: ``(min_pos + max_pos) / 2 + 0.5`` is the
+    0-based centre of the tie block, normalised by the number of values. Plain
+    ``argsort`` would hand each tie a different rank and skew the consensus.
+    """
+    order = np.argsort(values, kind="mergesort")
+    ranks = np.empty(len(values), dtype=np.float64)
+    start = 0
+    while start < len(values):
+        stop = start + 1
+        while stop < len(values) and values[order[stop]] == values[order[start]]:
+            stop += 1
+        mean_position = (start + stop - 1) / 2.0 + 0.5
+        ranks[order[start:stop]] = mean_position / len(values)
+        start = stop
+    return ranks
+
+
 def normalize_views(probs: np.ndarray, valid_time: np.ndarray, mode: str) -> np.ndarray:
+    """Rank-normalise each view independently; invalid frames (NaN/crop) stay NaN."""
     out = probs.copy()
     if mode == "raw":
         return out
@@ -91,11 +112,7 @@ def normalize_views(probs: np.ndarray, valid_time: np.ndarray, mode: str) -> np.
         valid = np.isfinite(out[view]) & valid_time
         if not valid.any():
             continue
-        values = out[view, valid]
-        order = np.argsort(values, kind="mergesort")
-        ranks = np.empty(len(values), dtype=np.float64)
-        ranks[order] = (np.arange(len(values), dtype=np.float64) + 0.5) / len(values)
-        out[view, valid] = ranks
+        out[view, valid] = _fractional_rank(out[view, valid])
     return out
 
 
@@ -119,10 +136,15 @@ def fuse_views(probs: np.ndarray, mode: str) -> np.ndarray:
 
 
 def moving_average(values: np.ndarray, width: int) -> np.ndarray:
+    """Box average; edges average only the taps inside the array, not zero padding."""
     if width <= 1:
         return values.copy()
     kernel = np.ones(int(width), dtype=np.float64) / int(width)
-    return np.convolve(values, kernel, mode="same")
+    smoothed = np.convolve(values, kernel, mode="same")
+    # np.convolve(mode="same") zero-pads the edges, under-weighting the first/last
+    # frames; divide by the effective weight so those frames stay comparable.
+    weights = np.convolve(np.ones_like(values), kernel, mode="same")
+    return np.divide(smoothed, weights, out=np.zeros_like(smoothed), where=weights > 0)
 
 
 def peak_windows(
@@ -143,7 +165,8 @@ def peak_windows(
     candidates = np.flatnonzero(local & (usable >= float(threshold)))
     selected: list[int] = []
     for index in candidates[np.argsort(usable[candidates])[::-1]]:
-        if all(abs(int(index) - kept) >= int(min_distance) for kept in selected):
+        peak_frame = int(frames[index])
+        if all(abs(peak_frame - int(frames[kept])) >= int(min_distance) for kept in selected):
             selected.append(int(index))
     selected.sort()
     return [

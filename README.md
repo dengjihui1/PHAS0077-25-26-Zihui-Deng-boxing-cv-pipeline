@@ -1,130 +1,68 @@
-# Boxing CV Final Code Submission Folder
+# Boxing CV — Final Code Submission
 
-This folder contains the useful local code for the final retained boxing computer-vision pipeline. It keeps the full inherited `core_pipeline` for reproducibility, but excludes failed exploratory branches, large checkpoints, cached features, videos, and temporary server logs.
+Retained code for the five-stage boxing computer-vision pipeline described in the
+dissertation. It keeps the inherited `core_pipeline` package for reproducibility and
+adds the two final experiment folders plus their result artifacts.
 
-## Folder Structure
-
-```text
-final_code_submission_clean_20260805/
-  .gitignore
-  README.md
-  core_pipeline/
-    src/
-    configs/
-    scripts/
-    tests/
-    pyproject.toml
-    uv.lock
-  stage4_multiview_consensus_final/
-    sweep_consensus.py
-    materialize_robust.py
-    analyze_stage5_readiness.py
-    run.sh
-    run_cv.sh
-    results_cv/
-  stage5_fighter_query_final/
-    build_features.py
-    train_fighter_matched.py
-    run_build.sh
-    run_matched.sh
-    results/
-```
-
-## What Is Included
-
-### Core pipeline
-
-`core_pipeline` contains the reusable five-stage project package and its tests. It includes the original Stage 1/2/3 implementation, Stage 4 base utilities, scripts, configs, and dependency files.
-
-This is inherited project code copied unchanged from the local original repository. It is retained so the final Stage 4 and Stage 5 scripts can be understood and run with their original dependencies.
-
-Main relevant Stage 3 files:
-
-- `core_pipeline/src/bcv/stage3_frame_classifier/dataset.py`
-- `core_pipeline/src/bcv/stage3_frame_classifier/model.py`
-- `core_pipeline/src/bcv/stage3_frame_classifier/infer.py`
-- `core_pipeline/src/bcv/stage3_frame_classifier/run.py`
-- `core_pipeline/scripts/cross_bout_experiment.py`
-
-### Final Stage 4 method
-
-`stage4_multiview_consensus_final` contains the retained Stage 4 improvement:
+## What is here
 
 ```text
-rank-normalized multi-view consensus
+core_pipeline/                    inherited five-stage package (bcv) + tests
+stage4_multiview_consensus_final/ Stage 4: rank-normalised multi-view consensus
+stage5_fighter_query_final/       Stage 5: fighter-query VideoMAE classifier
+report_analysis/                  script + CSVs behind the report figures/tables
 ```
 
-It aligns synchronized split-level Stage 3 probabilities, rank-normalizes each view, mean-fuses available views, detects consensus peaks, applies temporal NMS, and outputs one proposal stream per bout.
+## Final results (held-out Bout 115)
 
-The comparison below uses the same Bout 115 ground truth and strict one-to-one event-matching definition.
+| Stage | Method | Result |
+|---|---|---|
+| 4 | rank-normalised multi-view consensus | strict event F1 0.780 (precision 0.808, recall 0.754) |
+| 5 | fighter-query VideoMAE, argmax decoding | typed event F1 0.448, typed macro-F1 0.257 |
 
-| Method | Precision | Recall | Strict event F1 |
-|---|---:|---:|---:|
-| Previous independent-view reference | 0.925 | 0.209 | 0.341 |
-| Rank-normalized multi-view consensus | 0.808 | 0.754 | 0.780 |
+Independent-view Stage 4 baseline: precision 0.925, recall 0.209, F1 0.341.
 
-### Final Stage 5 method
+Artifacts: `stage4_multiview_consensus_final/results_cv/` and
+`stage5_fighter_query_final/results/final_retained_result.json`.
 
-`stage5_fighter_query_final` contains the retained Stage 5 route:
+## Dependencies and install
 
-```text
-verified Kinetics VideoMAE features + matched per-fighter categorical fighter-query
-```
-
-It starts from Stage 4 consensus proposals, uses short synchronized multi-view panels, and predicts a separate state for each fighter:
-
-```text
-null, body landed, head landed, blocked, missed
-```
-
-The final retained Bout 115 evaluation was:
-
-| Metric | Result |
-|---|---:|---:|
-| Typed event precision | 0.443 |
-| Typed event recall | 0.453 |
-| Typed event F1 | 0.448 |
-| Typed macro-F1 | 0.257 |
-
-For context, the archived original route used single-view 32-frame clips and eight-way clip classification. Its Bout 115 result was accuracy 0.204 and macro-F1 0.102. Because proposal construction, targets, and metrics changed, this is historical pipeline progress rather than a direct metric comparison. See `stage5_fighter_query_final/RESULTS.md` for the retained evaluation record and the included reproducibility artifact.
-
-## What Is Excluded
-
-The following are deliberately excluded from this clean folder:
-
-- failed Stage 5 exploration branches;
-- model checkpoints and `.pt` files;
-- feature caches such as `.npz` or memmaps;
-- raw videos and generated clips;
-- server `nohup`/training logs except lightweight retained result JSONs;
-- `__pycache__` and test cache folders.
-
-## Running The Code
-
-The original project uses `uv` and should be run from the server project root:
+Python ≥ 3.11, managed with [uv](https://docs.astral.sh/uv/):
 
 ```bash
-cd /home/ubuntu/boxing-cv-pipeline
-export PATH="/home/ubuntu/conda/bin:$PATH"
+cd core_pipeline
+uv sync --extra detect --extra train --extra label
 ```
 
-Typical Stage 3 reproduction command:
+## Reproduce the tests (works offline, no data needed)
+
+The self-contained check is the package test suite, which uses small synthetic videos
+and annotations generated on the fly:
 
 ```bash
-uv run python scripts/cross_bout_experiment.py --train-bouts 116 117 --eval-bout 115
+cd core_pipeline
+uv run pytest -q          # 80 tests, ~5 s
 ```
 
-Final Stage 4 cross-bout consensus sweep:
+## Reproduce Stage 4 / Stage 5
+
+The bout videos, punch labels, fighter boxes, Stage-3 probabilities and trained
+checkpoints are controlled project data and are not bundled. The experiment scripts
+are included so the runs can be repeated once those artefacts are restored:
 
 ```bash
-bash Zihui/stage4_multiview_consensus_final/run_cv.sh
+bash stage4_multiview_consensus_final/run_cv.sh    # Stage 4 sweep + leave-one-bout-out
+bash stage5_fighter_query_final/run_build.sh       # Stage 5 feature cache
+bash stage5_fighter_query_final/run_matched.sh     # Stage 5 training
+bash stage5_fighter_query_final/run_evaluate.sh    # Stage 5 final evaluation
 ```
 
-Final Stage 5 retained route:
+Each `run_*.sh` documents which input tree it expects and points at the original
+server paths; edit the `*_ROOT` variables for a different layout.
 
-```bash
-bash Zihui/stage5_fighter_query_final/run_build.sh
-bash Zihui/stage5_fighter_query_final/run_matched.sh
-```
+## Report analysis
 
-The copied folder is for clean submission/reading. On the server, paths may need to be placed under `/home/ubuntu/boxing-cv-pipeline/Zihui/` as in the original experiment folders.
+`report_analysis/` contains `build_report_package.py` (which produced the report's
+figures/tables) and the resulting CSVs: view-count ablation, temporal-tolerance curve,
+Stage 5 outcome-family F1 and class support. These back the numbers quoted in the
+dissertation Results section.

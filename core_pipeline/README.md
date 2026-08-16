@@ -1,5 +1,12 @@
 # boxing-cv-pipeline
 
+> **Historical snapshot.** This README and the package state reflect the inherited
+> project at handoff. The final submitted work (multi-view Stage 4 consensus and the
+> Stage 5 fighter-query classifier) lives in `../stage4_multiview_consensus_final/` and
+> `../stage5_fighter_query_final/`; see the repository root README for the final results.
+> References below to "Stage 5 NOT built" and AUROC 0.887 are the pre-improvement
+> baseline, not the final numbers.
+
 A 5-stage computer-vision pipeline that detects **punches** in boxing footage and (eventually)
 classifies strike type + which fighter. Package `bcv`, uv-managed, Python ≥3.11.
 

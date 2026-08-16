@@ -48,6 +48,12 @@ class EventDataset(Dataset):
 
 
 class MeanModel(nn.Module):
+    """View-averaged baseline with a shared two-slot head.
+
+    The 5-D path reads the two slots from the panel features' fighter axis; the
+    4-D path adds a learned per-fighter offset instead.
+    """
+
     def __init__(self, hidden: int, dim: int, dropout: float) -> None:
         super().__init__()
         self.proj = nn.Sequential(nn.LayerNorm(hidden), nn.Linear(hidden, dim), nn.GELU())
@@ -74,6 +80,12 @@ class MeanModel(nn.Module):
 
 
 class FighterQueryModel(nn.Module):
+    """Temporal query per view, masked cross-view attention, one query per fighter.
+
+    The two slots share one context transform and one 5-way head; each slot sees
+    its own feature, the opponent's feature, and their difference.
+    """
+
     def __init__(self, hidden: int, dim: int, dropout: float) -> None:
         super().__init__()
         self.proj = nn.Sequential(nn.LayerNorm(hidden), nn.Linear(hidden, dim), nn.GELU())

@@ -177,6 +177,11 @@ def square_crop_box(
 
 
 def proposal_indices(peak: int, unique_frames: int, video_length: int) -> np.ndarray:
+    """Frame indices of the ``unique_frames`` panel centred on ``peak``.
+
+    Indices are clipped to the video, so panels at the very start/end repeat the
+    boundary frame instead of shrinking.
+    """
     offsets = np.arange(unique_frames, dtype=np.int64) - unique_frames // 2
     return np.clip(int(peak) + offsets, 0, max(0, video_length - 1))
 
@@ -192,6 +197,12 @@ def make_panel(
     pad_frac: float,
     stripe: int,
 ) -> np.ndarray | None:
+    """Per-frame side-by-side panel: red crop on the left, blue on the right.
+
+    Returns None when any fighter box is missing in any frame, so the caller can
+    reject the whole view. The left/right layout is what panel-fighter pooling
+    later splits back into the two fighter tokens.
+    """
     panels = []
     half_width = size // 2
     for frame, frame_index in zip(frames_rgb, indices, strict=True):

@@ -1,0 +1,248 @@
+{
+  "method": "clean_gt_type_plus_proposal_activity",
+  "type": {
+    "best_epoch": 20,
+    "val": {
+      "accuracy": 0.5670391061452514,
+      "macro_f1": 0.3711026788606623,
+      "per_class_f1": [
+        0.4,
+        0.36363636363636365,
+        0.0,
+        0.75,
+        0.5617977528089888,
+        0.0,
+        0.17543859649122806,
+        0.717948717948718
+      ]
+    },
+    "test": {
+      "accuracy": 0.5448717948717948,
+      "macro_f1": 0.27372457069742906,
+      "per_class_f1": [
+        0.0,
+        0.2803738317757009,
+        0.2153846153846154,
+        0.7029972752043597,
+        0.13043478260869565,
+        0.0,
+        0.13333333333333333,
+        0.7272727272727273
+      ]
+    }
+  },
+  "activity": {
+    "best_epoch": 9,
+    "thresholds": {
+      "blue": 0.25,
+      "red": 0.4000000059604645
+    },
+    "val": {
+      "macro_f1": 0.6377279635258359,
+      "per_fighter_f1": {
+        "blue": 0.625,
+        "red": 0.6504559270516718
+      }
+    },
+    "test": {
+      "macro_f1": 0.6839739011880803,
+      "per_fighter_f1": {
+        "blue": 0.7328767123287672,
+        "red": 0.6350710900473934
+      }
+    }
+  },
+  "combined_test": {
+    "n": 437,
+    "micro_f1": 0.3757455268389662,
+    "macro_f1": 0.1783260818472086,
+    "per_class_f1": {
+      "blue_body_landed": 0.0,
+      "blue_head_landed": 0.2037037037037037,
+      "blue_strike_blocked": 0.15384615384615385,
+      "blue_strike_missed": 0.5142857142857142,
+      "red_body_landed": 0.1111111111111111,
+      "red_head_landed": 0.0,
+      "red_strike_blocked": 0.0,
+      "red_strike_missed": 0.44366197183098594
+    },
+    "per_class_positive": {
+      "blue_body_landed": 1,
+      "blue_head_landed": 58,
+      "blue_strike_blocked": 44,
+      "blue_strike_missed": 129,
+      "red_body_landed": 11,
+      "red_head_landed": 57,
+      "red_strike_blocked": 9,
+      "red_strike_missed": 115
+    },
+    "exact_match": 0.2311212814645309,
+    "fighter_accuracy": 0.4633867276887872,
+    "null_f1": 0.5238095238095238,
+    "mean_true_labels": 0.9702517162471396,
+    "mean_pred_labels": 1.331807780320366
+  },
+  "typed_event_test": {
+    "gt": 468,
+    "pred": 582,
+    "matched": 211,
+    "precision": 0.36254295532646047,
+    "recall": 0.45085470085470086,
+    "f1": 0.40190476190476193,
+    "macro_f1": 0.19760456395441864,
+    "per_class": {
+      "blue_body_landed": {
+        "gt": 1,
+        "pred": 3,
+        "matched": 0,
+        "f1": 0.0
+      },
+      "blue_head_landed": {
+        "gt": 66,
+        "pred": 50,
+        "matched": 17,
+        "f1": 0.29310344827586204
+      },
+      "blue_strike_blocked": {
+        "gt": 56,
+        "pred": 8,
+        "matched": 4,
+        "f1": 0.125
+      },
+      "blue_strike_missed": {
+        "gt": 148,
+        "pred": 291,
+        "matched": 116,
+        "f1": 0.5284738041002278
+      },
+      "red_body_landed": {
+        "gt": 11,
+        "pred": 43,
+        "matched": 4,
+        "f1": 0.14814814814814814
+      },
+      "red_head_landed": {
+        "gt": 58,
+        "pred": 1,
+        "matched": 0,
+        "f1": 0.0
+      },
+      "red_strike_blocked": {
+        "gt": 9,
+        "pred": 17,
+        "matched": 0,
+        "f1": 0.0
+      },
+      "red_strike_missed": {
+        "gt": 119,
+        "pred": 169,
+        "matched": 70,
+        "f1": 0.4861111111111111
+      }
+    }
+  },
+  "target_audit": {
+    "115": {
+      "proposals": 437,
+      "fighters": {
+        "blue": {
+          "gt": 271,
+          "matched": 232,
+          "missed": 39,
+          "unmatched_proposals": 205
+        },
+        "red": {
+          "gt": 197,
+          "matched": 192,
+          "missed": 5,
+          "unmatched_proposals": 245
+        }
+      }
+    },
+    "116": {
+      "proposals": 410,
+      "fighters": {
+        "blue": {
+          "gt": 176,
+          "matched": 148,
+          "missed": 28,
+          "unmatched_proposals": 262
+        },
+        "red": {
+          "gt": 153,
+          "matched": 146,
+          "missed": 7,
+          "unmatched_proposals": 264
+        }
+      }
+    },
+    "117": {
+      "proposals": 498,
+      "fighters": {
+        "blue": {
+          "gt": 242,
+          "matched": 205,
+          "missed": 37,
+          "unmatched_proposals": 293
+        },
+        "red": {
+          "gt": 313,
+          "matched": 262,
+          "missed": 51,
+          "unmatched_proposals": 236
+        }
+      }
+    },
+    "120": {
+      "proposals": 345,
+      "fighters": {
+        "blue": {
+          "gt": 119,
+          "matched": 93,
+          "missed": 26,
+          "unmatched_proposals": 252
+        },
+        "red": {
+          "gt": 175,
+          "matched": 147,
+          "missed": 28,
+          "unmatched_proposals": 198
+        }
+      }
+    },
+    "121": {
+      "proposals": 342,
+      "fighters": {
+        "blue": {
+          "gt": 144,
+          "matched": 95,
+          "missed": 49,
+          "unmatched_proposals": 247
+        },
+        "red": {
+          "gt": 242,
+          "matched": 159,
+          "missed": 83,
+          "unmatched_proposals": 183
+        }
+      }
+    },
+    "122": {
+      "proposals": 415,
+      "fighters": {
+        "blue": {
+          "gt": 174,
+          "matched": 128,
+          "missed": 46,
+          "unmatched_proposals": 287
+        },
+        "red": {
+          "gt": 188,
+          "matched": 133,
+          "missed": 55,
+          "unmatched_proposals": 282
+        }
+      }
+    }
+  }
+}

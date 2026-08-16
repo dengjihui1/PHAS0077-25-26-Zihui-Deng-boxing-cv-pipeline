@@ -1,0 +1,9 @@
+label,gt,pred,matched,f1,fighter,outcome
+blue_body_landed,1,1,0,0.0,blue,body_landed
+blue_head_landed,66,61,21,0.33070866141732286,blue,head_landed
+blue_strike_blocked,56,15,9,0.2535211267605634,blue,strike_blocked
+blue_strike_missed,148,166,83,0.5286624203821656,blue,strike_missed
+red_body_landed,11,1,0,0.0,red,body_landed
+red_head_landed,58,72,26,0.4,red,head_landed
+red_strike_blocked,9,13,0,0.0,red,strike_blocked
+red_strike_missed,119,150,73,0.5427509293680297,red,strike_missed

@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
+# Stage 5 training: per-fighter categorical fighter-query over the cached features.
+# Runs both the mean-fusion baseline and the fighter-query model.
 set -euo pipefail
 
-cd /home/ubuntu/boxing-cv-pipeline
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT/core_pipeline"
 export PATH="/home/ubuntu/conda/bin:$PATH"
 
-uv run python Zihui/stage5_multiview_structured_20260728/train_fighter_matched.py \
-  --features Zihui/stage5_multiview_structured_20260728/data/features.npz \
+uv run python "$ROOT/stage5_fighter_query_final/train_fighter_matched.py" \
+  --features "$ROOT/stage5_fighter_query_final/data/features.npz" \
   --pipeline-config configs/pipeline.yaml \
-  --output-dir Zihui/stage5_multiview_structured_20260728/models_matched \
+  --output-dir "$ROOT/stage5_fighter_query_final/models_matched" \
   --epochs 100 \
   --batch-size 64
