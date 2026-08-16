@@ -78,6 +78,11 @@ head landed, blocked, missed).
 
 ![Stage 5 fighter-query multi-view architecture](docs/fig_stage5_fighter_query_architecture.png)
 
+The architecture separates temporal aggregation from cross-view aggregation: a learned
+temporal query weights the eight frames of each view, masked cross-view attention then
+merges the available cameras while ignoring missing ones, and the red/blue slots share one
+context head so both fighters are read from the same scene evidence.
+
 ![Class support versus per-class F1](docs/fig_stage5_support_vs_f1.png)
 
 The support-versus-F1 plot explains the remaining difficulty: body-landed and blocked
