@@ -69,6 +69,13 @@ The view-count ablation confirms the mechanism — strict event F1 grows with th
 synchronised views (0.661 with one view to 0.780 with three), so the cameras contribute
 complementary rather than redundant evidence.
 
+![A single view can fail: multi-view agreement at a consensus event](docs/fig_multiview_agreement.png)
+
+A single view can fail. At the consensus event shown above (Bout 116, frame 2144), three
+views report a clear punch probability (0.849, 0.522, 0.845) while the fourth has no valid
+fighter crop (occluded). The rank-normalised consensus still detects the strike, which is
+why fusion is robust to viewpoint-specific occlusion.
+
 ## Stage 5 — fighter-query outcome model
 
 Each Stage 4 peak anchors an eight-frame synchronised panel. A verified Kinetics-pretrained
