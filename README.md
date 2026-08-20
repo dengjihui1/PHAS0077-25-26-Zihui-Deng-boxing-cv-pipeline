@@ -93,14 +93,18 @@ context head so both fighters are read from the same scene evidence.
 ![Class support versus per-class F1](docs/fig_stage5_support_vs_f1.png)
 
 The support-versus-F1 plot explains the remaining difficulty: body-landed and blocked
-outcomes have very few training examples and correspondingly weak recognition, while
+outcomes are under-represented in training and correspondingly weak at test, while
 frequent outcomes such as missed are far more reliable.
 
-![Pipeline bottleneck summary](docs/fig_pipeline_bottleneck_waterfall.png)
+| Pipeline level | Metric | Bout 115 |
+|---|---|---:|
+| Temporal localisation | strict event F1 | 0.780 |
+| Activity / null decision | per-fighter activity macro-F1 | 0.684 |
+| Outcome given clean GT timing | type macro-F1 | 0.274 |
+| End-to-end typed event detection | typed event F1 | 0.448 |
 
-The waterfall summarises the pipeline-level story — temporal localisation improves
-substantially, while fine-grained outcome recognition remains bounded by label scarcity
-and short RGB clips.
+These are distinct metrics on distinct tasks, so they are read row by row rather than as
+successive values of one quantity; fine-grained outcome recognition is the bottleneck.
 
 ## Metric definitions
 
